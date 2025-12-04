@@ -1,5 +1,19 @@
+const NUMBER_POSITIONS: i16 = 100;
+const INITIAL_POSITION: i16 = 50;
+
+/// Parses a rotation string like "R25" or "L13" into a signed rotation amount.
+///
+/// Returns positive values for right rotations and negative for left rotations.
+///
+/// # Examples
+/// - "R25" → 25
+/// - "L13" → -13
 fn parse_rotation(rotation_str: &str) -> i16 {
-    let rotation_mul = match rotation_str.chars().nth(0).expect("Invalid rotation direction") {
+    let rotation_mul = match rotation_str
+        .chars()
+        .next()
+        .expect("Invalid rotation direction")
+    {
         'R' => 1,
         'L' => -1,
         _ => panic!("invalid direction"),
@@ -8,15 +22,21 @@ fn parse_rotation(rotation_str: &str) -> i16 {
     rotation_mul * rotation_steps
 }
 
-fn update_dial(mut position: i16, mut change: i16) -> i16 {
-    const NUMBER_POSITIONS: i16 = 100;
-
+/// Updates the dial position by applying a rotation, wrapping around at 0-99.
+///
+/// Uses modular arithmetic to handle wrap-around in both directions.
+fn update_dial(position: i16, change: i16) -> i16 {
     (position + change).rem_euclid(NUMBER_POSITIONS)
 }
 
+/// Updates the dial position and counts how many times the dial passes through zero.
+///
+/// Returns (new_position, zero_count).
+///
+/// Counts both crossing zero (e.g., 99→0 or 0→99) AND landing on zero.
+/// For right rotations: counts crossings of the 99→0 boundary.
+/// For left rotations: counts crossings of the 0→99 boundary (with offset to handle edge cases).
 fn update_dial_and_count_zeros(position: i16, change: i16) -> (i16, i16) {
-    const NUMBER_POSITIONS: i16 = 100;
-
     if change == 0 {
         return (position, 0);
     }
@@ -26,8 +46,7 @@ fn update_dial_and_count_zeros(position: i16, change: i16) -> (i16, i16) {
     let zero_count = if change > 0 {
         // For right rotations, we count the number of times we 'cross' the
         // 99 -> 0 dial position to get our 0 count.
-        (position + change).div_euclid(NUMBER_POSITIONS)
-            - position.div_euclid(NUMBER_POSITIONS)
+        (position + change).div_euclid(NUMBER_POSITIONS) - position.div_euclid(NUMBER_POSITIONS)
     } else {
         // For left rotations we need to to offset by 1 to count the number
         // of zeros we hit. For example, if we start on 0 and rotate left
@@ -47,23 +66,22 @@ fn update_dial_and_count_zeros(position: i16, change: i16) -> (i16, i16) {
 fn main() {
     let input = include_str!("../../../../inputs/day01.txt");
 
-    let rotations: Vec<i16> = input.lines().collect::<Vec<&str>>().iter().map(
-        |rotation_str| parse_rotation(rotation_str)
-    ).collect();
+    let rotations: Vec<i16> = input
+        .lines()
+        .map(|rotation_str| parse_rotation(rotation_str))
+        .collect();
 
-    //let nums = lines.
-
-    let mut position = 50;
+    let mut position = INITIAL_POSITION;
     let mut point_to_zero_count = 0;
     for rotation in rotations.iter() {
-            position = update_dial(position, *rotation);
-            if position == 0 {
-                point_to_zero_count += 1;
-            }
+        position = update_dial(position, *rotation);
+        if position == 0 {
+            point_to_zero_count += 1;
+        }
     }
     println!("Part 1: {}", point_to_zero_count);
 
-    position = 50;
+    position = INITIAL_POSITION;
     point_to_zero_count = 0;
     for rotation in rotations {
         let (new_position, zero_count) = update_dial_and_count_zeros(position, rotation);
