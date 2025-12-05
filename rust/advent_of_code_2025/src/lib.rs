@@ -10,6 +10,7 @@
 ///
 /// # Example
 /// ```
+/// use advent_of_code_2025::in_bounds;
 /// let grid = vec![vec!['a', 'b'], vec!['c', 'd']];
 /// assert!(in_bounds(&grid, 0, 0));
 /// assert!(in_bounds(&grid, 1, 1));
@@ -36,6 +37,7 @@ pub fn in_bounds(grid: &[Vec<char>], row: i32, col: i32) -> bool {
 ///
 /// # Example
 /// ```
+/// use advent_of_code_2025::count_neighbors;
 /// let grid = vec![
 ///     vec!['@', '.', '@'],
 ///     vec!['.', 'X', '.'],
@@ -43,8 +45,8 @@ pub fn in_bounds(grid: &[Vec<char>], row: i32, col: i32) -> bool {
 /// ];
 /// // Count '@' neighbours of centre cell with diagonals: 4
 /// assert_eq!(count_neighbors(&grid, 1, 1, true, &['@']), 4);
-/// // Without diagonals: 0
-/// assert_eq!(count_neighbors(&grid, 1, 1, false, &['@']), 0);
+/// // Without diagonals: 1 (only the one below)
+/// assert_eq!(count_neighbors(&grid, 1, 1, false, &['@']), 1);
 /// ```
 pub fn count_neighbors(
     grid: &[Vec<char>],
